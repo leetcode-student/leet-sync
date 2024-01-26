@@ -1,93 +1,121 @@
 /*
 
-63 minutes
-35 minutes
+if word a comes before word b, either
 
-z->x
-x->a
-a->z
-b->x
+a and b are equal
+a prefixes b
+a and b mismatch at some index i... then a[i] < b[i]
+
+wrt, wrf, er, ett, rftt
+
+t->f
+r->t
+w->e
+e->r
+
+find all dependencies
+see if there is a cycle
 
 */
 class Solution {
     public String alienOrder(String[] words) {
-        Map<Character, Set<Character>> firstToSecondMap = new HashMap<>();
-        Map<Character, Set<Character>> secondToFirstMap = new HashMap<>();
+        Map<Character, Set<Character>> charDependedBy = new HashMap<>();
+        Map<Character, Set<Character>> charDependents = new HashMap<>();
 
-        for (int i = 0; i < words.length; i++) {
-            String word = words[i];
-            for (int j = 0; j < word.length(); j++) {
-                char c = word.charAt(j);
-                if (!firstToSecondMap.containsKey(c)) {
-                    firstToSecondMap.put(c, new HashSet<>());
+        for (String word : words) {
+            for (int i = 0; i < word.length(); i++) {
+                char c = word.charAt(i);
+
+                if (!charDependedBy.containsKey(c)) {
+                    charDependedBy.put(c, new HashSet<>());
                 }
-                if (!secondToFirstMap.containsKey(c)) {
-                    secondToFirstMap.put(c, new HashSet<>());
+
+                if (!charDependents.containsKey(c)) {
+                    charDependents.put(c, new HashSet<>());
                 }
             }
         }
 
-        for (int i = 0; i < words.length - 1; i++) {
-            String firstWord = words[i];
-            String secondWord = words[i + 1];
+        for (int i = 0; i + 1 < words.length; i++) {
+            WordOrder wordOrder = compare(words[i], words[i + 1]);
 
-            boolean comparing = true;
-            for (int j = 0; j < Math.max(firstWord.length(), secondWord.length()); j++) {
-                char firstChar = j < firstWord.length() ? firstWord.charAt(j) : 0;
-                char secondChar = j < secondWord.length() ? secondWord.charAt(j) : 0;
-
-                if (firstChar == secondChar) {
-                    continue;
-                } else if (comparing && firstChar != 0 && secondChar == 0) {
-                    return "";
-                } else if (comparing && firstChar != 0) {
-                    if (secondToFirstMap.get(firstChar).contains(secondChar)) {
-                        return "";
-                    } else {
-                        firstToSecondMap.get(firstChar).add(secondChar);
-                        secondToFirstMap.get(secondChar).add(firstChar);
-                        comparing = false;
-                    }
-                }
+            //System.out.println("word1=" + words[i] + ", word2=" + words[i + 1] + ", wordOrder.before=" + wordOrder.before + ", wordOrder.after=" + wordOrder.after);
+            
+            if (!wordOrder.valid) {
+                return "";
+            } else if (wordOrder.before == wordOrder.after) {
+                continue;
             }
+
+            charDependedBy.get(wordOrder.before).add(wordOrder.after);
+            charDependents.get(wordOrder.after).add(wordOrder.before);
         }
 
         StringBuilder dict = new StringBuilder();
-        
-        Set<Character> roots = new HashSet<>();
-        for (char second : secondToFirstMap.keySet()) {
-            if (secondToFirstMap.get(second).isEmpty()) {
-                roots.add(second);
+        Queue<Character> queue = new LinkedList<>();
+        Set<Character> visited = new HashSet<>();
+
+        for (char c : charDependents.keySet()) {
+            if (charDependents.get(c).isEmpty()) {
+                queue.add(c);
+                visited.add(c);
+                dict.append(c);
             }
         }
 
-        System.out.println("firstToSecondMap=" + firstToSecondMap);
-        System.out.println("secondToFirstMap=" + secondToFirstMap);
-        System.out.println("roots=" + roots);
+        System.out.println("charDependedBy=" + charDependedBy);
+        System.out.println("charDependents=" + charDependents);
+        System.out.println("dict=" + dict);
 
-        for (char root : roots) {
-            Queue<Character> bfsQueue = new LinkedList<>();
-            bfsQueue.add(root);
-            secondToFirstMap.remove(root);
+        while (!queue.isEmpty()) {
+            char c = queue.poll();
+            for (char dependedBy : charDependedBy.get(c)) {
+                charDependents.get(dependedBy).remove(c);
 
-            while (!bfsQueue.isEmpty()) {
-                char curr = bfsQueue.poll();
-
-                dict.append(curr);
-                
-                for (char second : firstToSecondMap.get(curr)) {
-                    secondToFirstMap.get(second).remove(curr);
-                    if (secondToFirstMap.get(second).isEmpty()) {
-                        bfsQueue.add(second);
-                    }
+                if (!visited.contains(dependedBy) && charDependents.get(dependedBy).isEmpty()) {
+                    queue.add(dependedBy);
+                    visited.add(dependedBy);
+                    dict.append(dependedBy);
+                    //System.out.println("append c=" + c);
                 }
             }
         }
 
-        if (dict.length() == firstToSecondMap.size()) {
-            return dict.toString();
-        } else {
+        if (visited.size() != charDependedBy.size()) {
             return "";
         }
+
+        return dict.toString();
+    }
+
+    public WordOrder compare(String wordA, String wordB) {
+        WordOrder wordOrder = new WordOrder();
+
+        int minLength = Math.min(wordA.length(), wordB.length());
+
+        for (int i = 0; i < minLength; i++) {
+            char charA = wordA.charAt(i);
+            char charB = wordB.charAt(i);
+
+            if (charA != charB) {
+                wordOrder.valid = true;
+                wordOrder.before = charA;
+                wordOrder.after = charB;
+                return wordOrder;
+            }
+        }
+
+        if (wordA.length() > wordB.length()) {
+            return wordOrder;
+        }
+
+        wordOrder.valid = true;
+        return wordOrder;
+    }
+
+    private static class WordOrder {
+        boolean valid;
+        char before;
+        char after;
     }
 }
