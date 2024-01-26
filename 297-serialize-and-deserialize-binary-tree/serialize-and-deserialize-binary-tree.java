@@ -8,9 +8,8 @@
  * }
 
 [1,2,3,4,5]
-[1,2,null,null,3,4,null,null,5,null,null]
+1-2-null-null-3-4-null-null-5-null-null
 
-[1,    2,null,null,3,    4,null,null,5,null,null]
 
 
  */
@@ -18,76 +17,56 @@ public class Codec {
 
     // Encodes a tree to a single string.
     public String serialize(TreeNode root) {
-        if (root == null) {
-            return "";
-        }
-
         StringBuilder sb = new StringBuilder();
-        Queue<TreeNode> queue = new LinkedList<>();
+        serialize(root, sb);
+        if (sb.length() > 0) {
+            sb.deleteCharAt(sb.length() - 1);
+        }
+        return sb.toString();
+    }
+
+    private void serialize(TreeNode root, StringBuilder sb) {
+        if (root == null) {
+            sb.append("null,");
+            return;
+        }
 
         sb.append(root.val + ",");
-        queue.add(root);
-
-        while (!queue.isEmpty()) {
-            TreeNode node = queue.poll();
-
-            if (node.left == null) {
-                sb.append("null,");
-            } else {
-                sb.append(node.left.val + ",");
-                queue.add(node.left);
-            }
-
-            if (node.right == null) {
-                sb.append("null,");
-            } else {
-                sb.append(node.right.val + ",");
-                queue.add(node.right);
-            }
-        }
-
-        sb.deleteCharAt(sb.length() - 1);
-
-        System.out.println("serialized=" + sb.toString());
-
-        return sb.toString();
+        serialize(root.left, sb);
+        serialize(root.right, sb);
     }
 
     // Decodes your encoded data to tree.
     public TreeNode deserialize(String data) {
-        if (data.isEmpty()) {
+        String[] vals = data.split(",");
+        Queue<Integer> preOrderPath = new LinkedList<>();
+        for (String val : vals) {
+            if (val.equals("null")) {
+                preOrderPath.add(null);
+            } else {
+                preOrderPath.add(Integer.parseInt(val));
+            }
+        }
+        TreeNode root = deserialize(preOrderPath);
+        return root;
+    }
+
+    private TreeNode deserialize(Queue<Integer> preOrderPath) {
+        Integer nextVal = preOrderPath.poll();
+
+        if (nextVal == null) {
             return null;
         }
 
-        List<String> vals = Arrays.asList(data.split(","));
-        System.out.println("vals=" + vals);
-
-        Queue<TreeNode> queue = new LinkedList<>();
         TreeNode root = new TreeNode();
-        root.val = Integer.parseInt(vals.get(0));
-        queue.add(root);
+        root.val = nextVal;
 
-        int i = 1;
-        while (!queue.isEmpty()) {
-            TreeNode parent = queue.poll();
+        TreeNode left = deserialize(preOrderPath);
+        TreeNode right = deserialize(preOrderPath);
 
-            if (!vals.get(i).equals("null")) {
-                TreeNode left = new TreeNode();
-                left.val = Integer.parseInt(vals.get(i));
-                parent.left = left;
-                queue.add(left);
-            }
+        root.left = left;
+        root.right = right;
 
-            if (!vals.get(i + 1).equals("null")) {
-                TreeNode right = new TreeNode();
-                right.val = Integer.parseInt(vals.get(i + 1));
-                parent.right = right;
-                queue.add(right);
-            }
-
-            i += 2;
-        }
-        
         return root;
     }
 }
