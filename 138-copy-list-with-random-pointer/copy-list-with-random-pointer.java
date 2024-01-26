@@ -11,6 +11,10 @@ class Node {
         this.random = null;
     }
 }
+
+
+
+
 */
 
 class Solution {
@@ -19,38 +23,43 @@ class Solution {
             return null;
         }
 
-        Map<Node, Node> originalToCopy = new HashMap<>();
-
         Node curr = head;
-
         while (curr != null) {
-            if (!originalToCopy.containsKey(curr)) {
-                originalToCopy.put(curr, new Node(curr.val));
-            }
-
-            Node currCopy = originalToCopy.get(curr);
+            Node currCopy = new Node(curr.val);
             currCopy.val = curr.val;
+            currCopy.next = curr.next;
 
-            if (curr.next != null) {
-                if (!originalToCopy.containsKey(curr.next)) {
-                    originalToCopy.put(curr.next, new Node(curr.next.val));
-                }
+            curr.next = currCopy;
 
-                currCopy.next = originalToCopy.get(curr.next);
+            curr = curr.next.next;
+        }
 
-            }
+        curr = head;
+        while (curr != null) {
+            Node currCopy = curr.next;
 
             if (curr.random != null) {
-                if (!originalToCopy.containsKey(curr.random)) {
-                    originalToCopy.put(curr.random, new Node(curr.random.val));
-                }
-                
-                currCopy.random = originalToCopy.get(curr.random);
+                Node randomCopy = curr.random.next;
+                currCopy.random = randomCopy;
             }
+            
+            curr = curr.next.next;
+        }
+
+        Node copyHead = new Node(0);
+        Node copyPtr = copyHead;
+        curr = head;
+        while (curr != null) {
+            Node currCopy = curr.next;
+            curr.next = currCopy.next;
+            currCopy.next = null;
+
+            copyPtr.next = currCopy;
+            copyPtr = currCopy;
 
             curr = curr.next;
         }
 
-        return originalToCopy.get(head);
+        return copyHead.next;
     }
 }
