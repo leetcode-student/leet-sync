@@ -2,43 +2,34 @@
 
 What is a valid parenthesis?
 
-At any given point left to right, open_count >= close_count
-At any given point right to left, close_count >= open_count (basically reverse it)
+1. Scanning left to right, the closed count can't be more than the open count
+2. It is also true if you reverse the string
 
-If we try greedy approach and scan left to right, is it possible to remove too many closed parens?
-No, because that can only be made valid by adding an open paren before it.
-So it's to remove them
-
-Now it's possible for there to be too may open parens.
-For the same reason, we must remove them.
-
-->
-())
-  ^ remove
-<-
-(()
-^ remove
-
+input
 ))((
+1st pass
 ((
-
+2nd pass
+""
 
 
 */
 class Solution {
     public String minRemoveToMakeValid(String s) {
-        String withCloseParensFixed = withInvalidCloseParensRemoved(s);
+        String withCloseParensFixed = minRemoveToMakeValidHelper(s);
+        String withCloseParensFixedReversed = reverse(withCloseParensFixed);
+        String withAllParensFixedReversed = minRemoveToMakeValidHelper(withCloseParensFixedReversed);
+        String withAllParensFixed = reverse(withAllParensFixedReversed);
 
-        String withOpenParensFixedReversed = withInvalidCloseParensRemoved(reversed(withCloseParensFixed));
-        String withOpenParensFixed = reversed(withOpenParensFixedReversed);
-
-        return withOpenParensFixed;
+        return withAllParensFixed;
     }
 
-    private String reversed(String s) {
+    private String reverse(String s) {
         StringBuilder sb = new StringBuilder();
-        for (int i = s.length() - 1; i >= 0; i--) {
+
+        for (int i = s.length() - 1; i >=0; i--) {
             char c = s.charAt(i);
+
             if (c == '(') {
                 sb.append(')');
             } else if (c == ')') {
@@ -47,24 +38,24 @@ class Solution {
                 sb.append(c);
             }
         }
+
         return sb.toString();
     }
 
-    private String withInvalidCloseParensRemoved(String s) {
+    private String minRemoveToMakeValidHelper(String s) {
         StringBuilder sb = new StringBuilder();
 
         int openCount = 0;
-        int closeCount = 0;
-
         for (int i = 0; i < s.length(); i++) {
             char c = s.charAt(i);
+
             if (c == '(') {
                 openCount++;
                 sb.append(c);
             } else if (c == ')') {
-                if (closeCount < openCount) {
+                if (openCount > 0) {
+                    openCount--;
                     sb.append(c);
-                    closeCount++;
                 }
             } else {
                 sb.append(c);
