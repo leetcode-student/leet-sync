@@ -1,50 +1,61 @@
 /*
 
-1,2,3
-1,3,6
+Brute force
 
-1,2,2,3,3,3
+Expand each number. For example, 3 will create [3,3,3]
+Pick a random element
+
+Time: O(1)
+Space: O(n)
+
+[1,2,3,4,5]
+
+[1,3,6,10,15]
+pick a random number [1,14]
+1 -> 1
+2 -> 3
+3 -> 3
+4 -> 6
+5 -> 6
+6 -> 6
+7 -> 10
+8 -> 10
+9 -> 10
+10 -> 10
 
 */
 class Solution {
     private int[] w;
-    private int[] wDist;
+    private int[] prefixSum;
 
     public Solution(int[] w) {
         this.w = w;
-
-        this.wDist = new int[w.length];
-        wDist[0] = w[0];
+        this.prefixSum = new int[w.length];
+        prefixSum[0] = w[0];
         for (int i = 1; i < w.length; i++) {
-            wDist[i] = wDist[i - 1] + w[i];
+            prefixSum[i] = prefixSum[i - 1] + w[i];
         }
     }
 
     public int pickIndex() {
+        int value = (int) (prefixSum[prefixSum.length - 1] * Math.random()) + 1;
+
         int start = 0;
-        int end = wDist.length - 1;
-        int target = (wDist[start] + wDist[end]) / 2;
+        int end = prefixSum.length - 1;
 
-        while (start < end) {
-            int mid = (start + end) / 2;
-            
-            Integer leftSum = mid > 0 ? wDist[mid - 1] - wDist[start] + w[start] : null;
-            int midSum = w[mid];
-            Integer rightSum = mid < wDist.length ? wDist[end] - wDist[mid + 1] + w[mid + 1] : null;
-            int totalSum = (leftSum != null ? leftSum : 0) + midSum + (rightSum != null ? rightSum : 0);
+        while (start <= end) {
+            int mid = start + (end - start) / 2;
 
-            int roll = (int)(totalSum * Math.random() + 1);
-
-            if (roll <= midSum) {
+            if (value == prefixSum[mid]) {
                 return mid;
-            } else if (leftSum != null && roll <= midSum + leftSum) {
+            } else if (value < prefixSum[mid]) {
                 end = mid - 1;
             } else {
                 start = mid + 1;
             }
         }
 
-        return start;
+        return end + 1;
     }
 }
 
