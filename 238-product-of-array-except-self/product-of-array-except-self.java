@@ -1,24 +1,27 @@
+/*
+
+[1,2,3,4,5]
+[1,1,2,6,24]
+
+
+*/
 class Solution {
     public int[] productExceptSelf(int[] nums) {
-        int[] productLeftToRight = new int[nums.length];
-        productLeftToRight[0] = nums[0];
+        int[] prefixProduct = new int[nums.length];
+        prefixProduct[0] = 1;
+        int product = 1;
         for (int i = 1; i < nums.length; i++) {
-            productLeftToRight[i] = productLeftToRight[i - 1] * nums[i];
+            product = product * nums[i - 1];
+            prefixProduct[i] = product;
         }
 
-        int[] productRightToLeft = new int[nums.length];
-        productRightToLeft[nums.length - 1] = nums[nums.length - 1];
+        product = 1;
         for (int i = nums.length - 2; i >= 0; i--) {
-            productRightToLeft[i] = nums[i] * productRightToLeft[i + 1];
+            int leftProduct = prefixProduct[i];
+            product = product * nums[i + 1];
+            prefixProduct[i] = leftProduct * product;
         }
 
-        int[] productExceptSelf = new int[nums.length];
-        for (int i = 0; i < nums.length; i++) {
-            int leftProduct = i > 0 ? productLeftToRight[i - 1] : 1;
-            int rightProduct = i + 1 < nums.length ? productRightToLeft[i + 1] : 1;
-            productExceptSelf[i] = leftProduct * rightProduct;
-        }
-
-        return productExceptSelf;
+        return prefixProduct;
     }
 }
