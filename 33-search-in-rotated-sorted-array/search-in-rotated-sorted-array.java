@@ -27,28 +27,25 @@ else
 */
 class Solution {
     public int search(int[] nums, int target) {
-        int i = 0;
-        int j = nums.length - 1;
+        int left = 0;
+        int right = nums.length - 1;
 
-        while (i <= j) {
-            int mid = i + (j - i) / 2;
-            System.out.println("mid=" + mid);
-            
-            if (target == nums[mid]) {
+        while (left <= right) {
+            int mid = left + (right - left) / 2;
+
+            if (nums[mid] == target) {
                 return mid;
-            }
-
-            if (target >= nums[mid]) {
-                if (target <= nums[j] || nums[mid] > nums[j]) {
-                    i = mid + 1;
+            } else if (nums[mid] <= target) {
+                if (nums[mid] > nums[right] || target <= nums[right]) {
+                    left = mid + 1;
                 } else {
-                    j = mid - 1;
+                    right = mid - 1;
                 }
             } else {
-                if (target >= nums[i] || nums[i] > nums[mid]) {
-                    j = mid - 1;
+                if (nums[left] > nums[mid] || target >= nums[left]) {
+                    right = mid - 1;
                 } else {
-                    i = mid + 1;
+                    left = mid + 1;
                 }
             }
         }
