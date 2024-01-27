@@ -17,11 +17,13 @@ class Solution {
         for (int i = 0; i < nums.length; i++) {
             int key = prefixSum[i] - nums[i];
             sumCounts.put(key, sumCounts.getOrDefault(key, 0) + 1);
-
+            
             int required = prefixSum[i] - k;
             if (sumCounts.containsKey(required)) {
                 count += sumCounts.get(required);
             }
+
+            
         }
 
         return count;
