@@ -1,62 +1,50 @@
 /*
 
-609
-6099
+n=1
+0,1,8
+n=2
+11,69,88,96
+n=3
+101,609,906,808,111,619,916,818,181,689,986,888
+n=4
+1111,...
 
 */
 class Solution {
     public List<String> findStrobogrammatic(int n) {
-        List<String> firstStrobos = new ArrayList<>(Arrays.asList("0", "1", "8"));
-        List<String> secondStrobos = new ArrayList<>(Arrays.asList("11", "69", "88", "96"));
+        Set<String> first = new HashSet<>(Arrays.asList("0", "1", "8"));
+        Set<String> second = new HashSet<>(Arrays.asList("11", "69", "88", "96"));
 
-        if (n == 1) {
-            return firstStrobos;
-        } else if (n == 2) {
-            return secondStrobos;
-        }
-
-        if (n % 2 == 0) {
-            return findStrobos(4, n, secondStrobos);
+        Set<String> stroboSet;
+        if (n % 2 == 1) {
+            stroboSet = findStrobogrammatic(first, 1, n);
         } else {
-            return findStrobos(3, n, firstStrobos);
-        }
-    }
-
-    private List<String> findStrobos(int i, int n, List<String> lastStrobos) {
-        if (i > n) {
-            return lastStrobos;
+            stroboSet = findStrobogrammatic(second, 2, n);
         }
 
-        Set<String> currStrobos = buildStrobos(i, lastStrobos);
-        List<String> currStrobosList = new ArrayList<>(currStrobos);
-        Collections.sort(currStrobosList);
-
-        //System.out.println("i=" + i);
-        //System.out.println("currStrobosList=" + currStrobosList);
-        //System.out.println();
-
-        return findStrobos(i + 2, n, currStrobosList);
+        return new ArrayList<>(stroboSet);
     }
 
-    private Set<String> buildStrobos(int i, List<String> lastStrobos) {
-        Set<String> strobos = new HashSet<>();
+    private Set<String> findStrobogrammatic(Set<String> previousStrobos, int nPrevious, int nTarget) {
+        if (nPrevious == nTarget) {
+            return previousStrobos;
+        }
 
-        for (String lastStrobo : lastStrobos) {
-            List<String> lastStroboVersions = new ArrayList<>();
-            lastStroboVersions.add(lastStrobo);
+        Set<String> currentStrobos = new HashSet<>();
+        for (String previousStrobo : previousStrobos) {
+            currentStrobos.add("1" + previousStrobo + "1");
+            currentStrobos.add("6" + previousStrobo + "9");
+            currentStrobos.add("9" + previousStrobo + "6");
+            currentStrobos.add("8" + previousStrobo + "8");
 
-            if (i >= 4) {
-                lastStroboVersions.add('0' + lastStrobo.substring(1, lastStrobo.length() - 1) + '0');
-            }
-            
-            for (String lastStroboVersion : lastStroboVersions) {
-                strobos.add('1' + lastStroboVersion + '1');
-                strobos.add('6' + lastStroboVersion + '9');
-                strobos.add('9' + lastStroboVersion + '6');
-                strobos.add('8' + lastStroboVersion + '8');
+            if (nPrevious >= 2) {
+                currentStrobos.add("10" + previousStrobo.substring(1, previousStrobo.length() - 1) + "01");
+                currentStrobos.add("60" + previousStrobo.substring(1, previousStrobo.length() - 1) + "09");
+                currentStrobos.add("90" + previousStrobo.substring(1, previousStrobo.length() - 1) + "06");
+                currentStrobos.add("80" + previousStrobo.substring(1, previousStrobo.length() - 1) + "08");
             }
         }
 
-        return strobos;
+        return findStrobogrammatic(currentStrobos, nPrevious + 2, nTarget);
     }
 }
