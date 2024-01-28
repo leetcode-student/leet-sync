@@ -1,61 +1,89 @@
 /*
 
-Brute force
+brute force
 
-Expand each number. For example, 3 will create [3,3,3]
-Pick a random element
+for each element with value x, create x copies
+3 -> 3,3,3
+then pick a random element
 
-Time: O(1)
-Space: O(n)
+time: O(total sum)
+space: O(total sum)
+
+optimize
+
+prefix sum
 
 [1,2,3,4,5]
-
 [1,3,6,10,15]
-pick a random number [1,14]
-1 -> 1
-2 -> 3
-3 -> 3
-4 -> 6
-5 -> 6
-6 -> 6
-7 -> 10
-8 -> 10
-9 -> 10
-10 -> 10
+1-15
+
+1->1
+2->2
+3->2
+4->3
+5->3
+6->3
+7->4
+8->4
+9->4
+10->4
+11->5
+12->5
+13->5
+14->5
+15->5
 
 */
 class Solution {
-    private int[] w;
     private int[] prefixSum;
+    private int sum;
 
     public Solution(int[] w) {
-        this.w = w;
+        this.sum = 0;
+        for (int i = 0; i < w.length; i++) {
+            this.sum += w[i];
+        }
         this.prefixSum = new int[w.length];
-        prefixSum[0] = w[0];
+        this.prefixSum[0] = w[0];
         for (int i = 1; i < w.length; i++) {
-            prefixSum[i] = prefixSum[i - 1] + w[i];
+            this.prefixSum[i] = prefixSum[i - 1] + w[i];
         }
     }
 
     public int pickIndex() {
-        int value = (int) (prefixSum[prefixSum.length - 1] * Math.random()) + 1;
+        int target = (int) (Math.random() * sum) + 1;
 
+        int index = binarySearch(prefixSum, target);
+
+        return index;
+    }
+/**
+target = 9
+
+[1,3,6,10,15]
+start=0,end=4
+mid=2
+
+start=3,end=4
+
+ */
+    private int binarySearch(int[] array, int target) {
         int start = 0;
-        int end = prefixSum.length - 1;
+        int end = array.length - 1;
 
-        while (start <= end) {
+        while (start < end) {
             int mid = start + (end - start) / 2;
 
-            if (value == prefixSum[mid]) {
+            if (array[mid] == target) {
                 return mid;
-            } else if (value < prefixSum[mid]) {
-                end = mid - 1;
-            } else {
+            } else if (array[mid] < target) {
                 start = mid + 1;
+            } else {
+                end = mid;
             }
         }
 
-        return end + 1;
+        return end;
     }
 }
 
