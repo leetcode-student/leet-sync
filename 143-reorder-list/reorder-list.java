@@ -8,57 +8,77 @@
  *     ListNode(int val, ListNode next) { this.val = val; this.next = next; }
  * }
 
- 47 minutes
+get list length
+put the second half on a stack
+merge the lists
 
- length=4
- second half starts at 2
+1,2,3,4
+len=4
+mid=2
 
- length = 5
- second half starts at 3
+1,2,3,4,5
+len=5
+mid=2
+
+
 
  */
 class Solution {
     public void reorderList(ListNode head) {
-        ListNode secondHalf = null;
-        ListNode curr;
+        ListNode temp = head;
 
-        curr = head;
-        int nodeCount = 0;
-        while (curr != null) {
-            nodeCount++;
-            curr = curr.next;
+        int length = 0;
+        while (temp != null) {
+            length++;
+            temp = temp.next;
         }
-        int secondHalfStart = (nodeCount + 1) / 2;
 
-        curr = head;
-        for (int i = 0; i < nodeCount; i++) {
-            ListNode next = curr.next;
-            
-            if (i + 1 == secondHalfStart) {
-                curr.next = null;
-            } else if (i == secondHalfStart) {
-                secondHalf = curr;
-                curr.next = null;
-            } else if (i > secondHalfStart) {
-                curr.next = secondHalf;
-                secondHalf = curr;
+        if (length <= 1) {
+            return;
+        }
+
+        System.out.println("length=" + length);
+
+        int secondHalfIdx = length / 2;
+
+        ListNode firstHalfLast = head;
+        for (int i = 0; i + 1 < secondHalfIdx; i++) {
+            firstHalfLast = firstHalfLast.next;
+        }
+        ListNode secondHalfHead = firstHalfLast.next;
+        firstHalfLast.next = null;
+
+        ListNode secondHalfStack = null;
+        temp = secondHalfHead;
+        while (temp != null) {
+            ListNode nextTemp = temp.next;
+            temp.next = secondHalfStack;
+            secondHalfStack = temp;
+            temp = nextTemp;
+        }
+
+        System.out.println("merging...");
+
+        ListNode headPtr = new ListNode();
+        ListNode firstHalfPtr = head;
+        ListNode secondHalfPtr = secondHalfStack;
+
+        while (firstHalfPtr != null || secondHalfPtr != null) {
+            System.out.println("firstHalfPtr=" + (firstHalfPtr == null ? "null" : firstHalfPtr.val));
+            System.out.println("secondHalfPtr=" + (secondHalfPtr == null ? "null" : secondHalfPtr.val));
+            if (firstHalfPtr != null) {
+                headPtr.next = firstHalfPtr;
+                headPtr = headPtr.next;
+                firstHalfPtr = firstHalfPtr.next;
             }
 
-            curr = next;
-        }
-
-        curr = head;
-        while (curr != null) {
-            if (secondHalf != null) {
-                ListNode nextNext = curr.next;
-                ListNode next = secondHalf;
-                secondHalf = secondHalf.next;
-                curr.next = next;
-                next.next = nextNext;
-                curr = nextNext;
-            } else {
-                curr = curr.next;
+            if (secondHalfPtr != null) {
+                headPtr.next = secondHalfPtr;
+                headPtr = headPtr.next;
+                secondHalfPtr = secondHalfPtr.next;
             }
         }
+
+        headPtr.next = null;
     }
 }
